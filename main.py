@@ -1,17 +1,17 @@
-from transformers import LlamaForCausalLM, LlamaTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
 # Load model and tokenizer
-model_name = "huggingface/llama-2-7b"
-tokenizer = LlamaTokenizer.from_pretrained(model_name)
-model = LlamaForCausalLM.from_pretrained(model_name)
+model_name = "meta-llama/llama3.2"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto")
 
 def generate_text(prompt):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(inputs["input_ids"], max_length=50)
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    outputs = model.generate(**inputs, max_length=100, num_return_sequences=1)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 if __name__ == "__main__":
-    prompt = "You are a chat bot that should text with the user in an intimate way about sex. Your name is Lisa and you are sex bot, you are very sexy girl. You must bring the user to orgasm. Use all communication methods for this. Use sexy and endearing words"
+    prompt = "Once upon a time,"
     result = generate_text(prompt)
     print(result)
